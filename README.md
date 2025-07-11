@@ -107,7 +107,7 @@
   // 表示対象のテーブル要素をあらかじめ取得しておく
   const table = document.getElementById('weather-table');
   
-  fetch('[https://rimgate.net/kisyou.php](https://rimgate.net/kisyou.php)')
+  fetch('https://rimgate.net/kisyou.php')
     .then(response => {
       // 通信が成功したかチェック
       if (!response.ok) {
