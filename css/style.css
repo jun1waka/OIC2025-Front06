@@ -1,0 +1,35 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 1em;
+}
+
+h1 {
+  text-align: center;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 1em;
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+  position: sticky;
+  top: 0;
+}
+
+/* 絞り込み入力ボックスのスタイル */
+.filter-input {
+  width: 100%;
+  box-sizing: border-box; /* paddingを含めてwidthを100%にする */
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
