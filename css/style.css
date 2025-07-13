@@ -3,7 +3,7 @@ body {
   padding: 1em;
 }
 
-h1 {
+h1, p {
   text-align: center;
 }
 
@@ -19,17 +19,43 @@ table, th, td {
   text-align: left;
 }
 
-th {
+thead {
   background-color: #f2f2f2;
   position: sticky;
   top: 0;
+  z-index: 10;
 }
 
 /* 絞り込み入力ボックスのスタイル */
 .filter-input {
   width: 100%;
-  box-sizing: border-box; /* paddingを含めてwidthを100%にする */
+  box-sizing: border-box;
   padding: 4px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* ヘッダーがクリック可能であることを示す */
+th.sortable {
+  cursor: pointer;
+  user-select: none; /* テキスト選択を無効化 */
+}
+
+/* ヘッダーに表示するソート方向の矢印 */
+th.sortable::after {
+  content: ' \2195'; /* 上下矢印 */
+  color: #ccc;
+  font-weight: normal;
+  float: right;
+}
+
+th.sort-asc::after {
+  content: ' \25B2'; /* ▲ */
+  color: #333;
+}
+
+th.sort-desc::after {
+  content: ' \25BC'; /* ▼ */
+  color: #333;
 }
