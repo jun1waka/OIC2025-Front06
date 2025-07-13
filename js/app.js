@@ -1,89 +1,91 @@
-  const table = document.getElementById('weather-table');
-  const thead = table.querySelector('thead');
-  const tbody = table.querySelector('tbody');
+// 表示対象のテーブル要素をあらかじめ取得しておく
+const table = document.getElementById('weather-table');
 
-  // データを取得してテーブルを構築する
-  fetch('https://rimgate.net/kisyou.php')
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.text();
-    })
-    .then(data => {
-      const lines = data.split('\n').filter(line => line.trim() !== '');
-      if (lines.length < 2) return;
-
-      // ヘッダー行を生成
-      const headerCells = lines[0].split(',');
-      const headerRow = document.createElement('tr');
-      const filterRow = document.createElement('tr'); // 絞り込み入力用の行
-
-      headerCells.forEach((headerText, index) => {
-        // ヘッダーテキスト用のセル
-        const th = document.createElement('th');
-        th.textContent = headerText;
-        headerRow.appendChild(th);
-
-        // 絞り込み入力用のセル
-        const filterTh = document.createElement('th');
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.placeholder = `${headerText}で絞り込み...`;
-        input.classList.add('filter-input');
-        input.dataset.columnIndex = index; // 列のインデックスを保持
-        filterTh.appendChild(input);
-        filterRow.appendChild(filterTh);
-      });
-
-      thead.appendChild(headerRow);
-      thead.appendChild(filterRow);
-
-      // データ行を生成
-      for (let i = 1; i < lines.length; i++) {
-        const rowData = lines[i].split(',');
-        const tr = document.createElement('tr');
-        rowData.forEach(cellData => {
-          const td = document.createElement('td');
-          td.textContent = cellData;
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      }
-      
-      // 絞り込みイベントリスナーを設定
-      setupFiltering();
-    })
-    .catch(error => {
-      console.error('データの取得または処理中にエラーが発生しました:', error);
-      tbody.innerHTML = `<tr><td colspan="100%">データの読み込みに失敗しました。</td></tr>`;
-    });
-
-  // 絞り込み機能をセットアップする関数
-  function setupFiltering() {
-    const filterInputs = thead.querySelectorAll('.filter-input');
+console.log('--- Fetchのまえ ---');
+fetch('https://rimgate.net/kisyou.php')
+  .then(response => {
+    console.log('--- 取得したresponse生データ ---');
+    console.log(response); 
+    // 通信が成功したかチェック
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.text(); // レスポンスをテキストとして解析
+  })
+  .then(data => {
+    // 成功した場合の処理
+    console.log('--- 取得した生データ ---');
+    console.log(data); 
+    //平均計算用
+    let avgSum = [];
+    let avgCount = [];
     
-    filterInputs.forEach(input => {
-      input.addEventListener('input', () => {
-        const filters = Array.from(filterInputs).map(i => ({
-          columnIndex: i.dataset.columnIndex,
-          value: i.value.toLowerCase()
-        }));
+    // データを改行で分割して配列にする
+    const lines = data.split('\r\n').filter(line => line.trim() !== '');
+    console.log('--- 改行で分割した配列 ---');
+    console.log(lines);
+    // 1行目(ヘッダー)をカンマで分割
+    const headerRowData = lines[0].split(',');
+    // theadとtr要素を作成
+    const thead = document.createElement('thead');
+    const headerTr = document.createElement('tr');  
 
-        const rows = tbody.querySelectorAll('tr');
-        rows.forEach(row => {
-          const cells = row.querySelectorAll('td');
-          let isVisible = true;
-
-          filters.forEach(filter => {
-            const cellText = cells[filter.columnIndex]?.textContent.toLowerCase() || '';
-            if (cellText.indexOf(filter.value) === -1) {
-              isVisible = false;
-            }
-          });
-
-          row.style.display = isVisible ? '' : 'none';
-        });
-      });
+    // ヘッダーの各項目に対してth要素を作成
+    headerRowData.forEach(headerText => {
+      const th = document.createElement('th');
+      th.textContent = headerText;
+      headerTr.appendChild(th);
     });
-  }
+    // 組み立てた要素をDOMに追加
+    thead.appendChild(headerTr);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    // 2行目以降のデータをループ
+    let cellCount = 0;
+    for (let i = 1; i < lines.length; i++) {
+      const rowData = lines[i].split(',');
+      const tr = document.createElement('tr');
+      // 各行のセルデータをループ
+      cellCount = 0;
+      rowData.forEach(cellData => {
+        const td = document.createElement('td');
+        td.textContent = cellData;
+        if(!Number.isNaN(parseFloat(cellData))){
+            if(Number.isNaN(parseFloat(avgSum[cellCount]))){
+            	avgSum[cellCount] = 0.0;
+            }
+            if(Number.isNaN(parseFloat(avgCount[cellCount]))){
+            	avgCount[cellCount] = 0;
+            }
+        	avgSum[cellCount] += parseFloat(cellData);
+        	avgCount[cellCount]++;
+        } 
+        cellCount++;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    }
+    console.log(avgSum);
+    console.log(avgCount);
+    
+    const avgtr = document.createElement('tr');
+    for (let i = 0; i < cellCount; i++) {
+        const td = document.createElement('td');
+        if(avgCount[i] > 0){
+          td.textContent = (avgSum[i]/avgCount[i]);
+        }
+        avgtr.appendChild(td);
+    }
+    tbody.appendChild(avgtr);
+
+
+    table.appendChild(tbody);
+
+  })
+  .catch(error => {
+    // 失敗した場合の処理
+    console.error('データの取得に失敗しました:', error);
+  });
+console.log('--- Fetchのあと ---');
+
